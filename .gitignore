@@ -1,0 +1,9 @@
+venv/
+dist/
+build/
+__pycache__/
+*.pyc
+*.pyo
+*.spec
+icon.iconset/
+.DS_Store
