@@ -1,8 +1,20 @@
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
 from PIL import Image
+
+
+def _ffmpeg_bin() -> str:
+    path = shutil.which("ffmpeg") or shutil.which(
+        "ffmpeg", path="/opt/homebrew/bin:/usr/local/bin:/usr/bin"
+    )
+    if not path:
+        raise EnvironmentError(
+            "ffmpeg 가 설치되지 않았습니다. 'brew install ffmpeg' 로 설치해주세요."
+        )
+    return path
 
 
 def convert_to_webp(src: str, dst_dir: str, quality: int = 80) -> str:
@@ -19,10 +31,8 @@ def convert_to_webm(src: str, dst_dir: str, crf: int = 33) -> str:
     src_path = Path(src)
     dst_path = Path(dst_dir) / (src_path.stem + ".webm")
 
-    _check_ffmpeg()
-
     cmd = [
-        "ffmpeg", "-y",
+        _ffmpeg_bin(), "-y",
         "-i", str(src_path),
         "-c:v", "libvpx-vp9",
         "-crf", str(crf),
@@ -85,13 +95,3 @@ def batch_convert(
     return results
 
 
-def _check_ffmpeg():
-    result = subprocess.run(
-        ["ffmpeg", "-version"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    if result.returncode != 0:
-        raise EnvironmentError(
-            "ffmpeg 가 설치되지 않았습니다. 'brew install ffmpeg' 로 설치해주세요."
-        )
